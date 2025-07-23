@@ -77,8 +77,11 @@ fun MainScreen(
                     .fillMaxWidth()
                     .padding(24.dp),
                 onClick = {
-                    ensureBluetoothEnabled()
-                    viewModel.startScanning()
+                    if (bluetoothEnabled.value) {
+                        viewModel.startScanning()
+                    } else {
+                        ensureBluetoothEnabled()
+                    }
                     }) { Text("내 카드 주기") }
 
             // BLE 주변 기기, Advertising버튼
@@ -87,8 +90,11 @@ fun MainScreen(
                     .fillMaxWidth()
                     .padding(24.dp),
                 onClick = {
-                    ensureBluetoothEnabled()
-                    viewModel.startAdvertising()
+                    if (bluetoothEnabled.value) {
+                        viewModel.startAdvertising()
+                    } else {
+                        ensureBluetoothEnabled()
+                    }
                 }) { Text("상대 카드를 받아오기") }
         } else {
             // 스캔 중이거나 광고 중인 상태라면, 비활성화를 해주는 버튼
@@ -106,7 +112,9 @@ fun MainScreen(
             ) { Text("연결 종료") }
         }
 
-        Card() {
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "상대 카드 정보")
             Text(text = "아이디 : ${receivedCard?.userId}")
             Text(text = "이름 : ${receivedCard?.userName}")
@@ -115,7 +123,6 @@ fun MainScreen(
     }
 
 }
-
 
 fun checkBluetoothEnabled(context: Context): Boolean {
     val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager

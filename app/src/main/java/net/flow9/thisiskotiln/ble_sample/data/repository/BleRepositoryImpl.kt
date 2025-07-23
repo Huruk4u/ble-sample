@@ -82,10 +82,11 @@ class BleRepositoryImpl (
     }
 
     // ble Scanner 인스턴스 초기화
-    @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
+    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     override fun stopScan() {
         bleScanner?.stopScan()
         bleScanner = null
+        gattClientManager?.disconnect()
     }
 
     // 디바이스 발견 시 GATT Client로 연결
