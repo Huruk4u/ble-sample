@@ -78,7 +78,6 @@ class MainActivity : ComponentActivity() {
                         viewModelRef.value = it
                     }
 
-
                     MainScreen(
                         viewModel = viewModel,
                         myUserCard = myCard
