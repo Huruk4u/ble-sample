@@ -17,10 +17,6 @@ fun MainScreen(
 ) {
     val receivedCard by viewModel.receivedCard.collectAsState()
 
-    // 교환 상태를 관리하기 위해 사용하는 변수
-    // Scanner, Advertiser로 활성화 된 상태라면, isExchanging은 true가 된다.
-    var isExchanging by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -37,12 +33,10 @@ fun MainScreen(
                 .fillMaxWidth()
                 .padding(24.dp),
             onClick = {
-                if (!isExchanging) {
+                if (!viewModel.isBleActivate.value) {
                     viewModel.startScanning()
-                    isExchanging = true
                 } else {
                     viewModel.stopScanning()
-                    isExchanging = false
                 }
             }) { Text("내 카드 주기") }
 
@@ -54,12 +48,10 @@ fun MainScreen(
                 .fillMaxWidth()
                 .padding(24.dp),
             onClick = {
-                if (!isExchanging) {
+                if (!viewModel.isBleActivate.value) {
                     viewModel.startAdvertising()
-                    isExchanging = true
                 } else {
                     viewModel.stopAdvertising()
-                    isExchanging = false
                 }
             }) { Text("상대 카드를 받아오기") }
 
