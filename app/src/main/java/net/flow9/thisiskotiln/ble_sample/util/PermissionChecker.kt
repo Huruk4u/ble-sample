@@ -27,7 +27,7 @@ class PermissionChecker {
         }
     }
 
-    // 모든 권한이 허용됐는지 확인
+    // 모든 권한이 허용됐는지 확인 당장은 BLE권한 밖에 확인할 거 없어서 사용처 X
     fun hasAllPermissions(context: Context): Boolean {
         val permissions = getRequireBlePermissions()
         return permissions.all {

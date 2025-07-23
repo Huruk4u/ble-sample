@@ -1,5 +1,6 @@
 package net.flow9.thisiskotiln.ble_sample.presentation
 
+import MainViewModel
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.pm.PackageManager
@@ -42,17 +43,27 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // 허용되지 않은 권한 조회 후 권한 요청
         val missingPermissions = PermissionChecker().getMissingPermissions(this)
         if (missingPermissions.isNotEmpty()) {
             permissionLauncher.launch(missingPermissions)
         }
 
+        val myUserCard = UserCard(1, "seongminYoo", "Backend Engineer")
+
+        // Repository, viewModel간 의존 관계 설정
+        val bleRepository = BleRepositoryImpl(this@MainActivity, bluetoothAdapter)
+        // viewModel, repository의 상호 의존 관계 때문에 동시에 생성해야함.
+        val viewModel = MainViewModel(bleRepository)
+
+        // 이렇게 하면, viewModel의 onUserCardReceived가 동작했을때, Repository의 콜백함수가 호출된다.
+        bleRepository.setOnUserCardReceivedListener { viewModel.onUserCardReceived(it) }
+
         setContent {
             Ble_sampleTheme {
-                }
                 MainScreen(
                     viewModel = viewModel,
-                    myUserCard = myCard
+                    myUserCard = myUserCard
                 )
             }
         }

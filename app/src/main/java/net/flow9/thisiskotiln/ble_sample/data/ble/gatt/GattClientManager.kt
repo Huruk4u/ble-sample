@@ -17,7 +17,7 @@ import net.flow9.thisiskotlin.ble_sample.data.ble.model.BleConstants
  */
 class GattClientManager (
     private val context: Context,
-    private val onUserCardReceived: (UserCard) -> Unit
+    private val onUserCardReceived: ((UserCard) -> Unit)?
 ) {
 
     // json데이터 파싱을 위한 gson, GattClient 인스턴스를 생성하기 위한 bluetoothGatt 인스턴스 호출
@@ -77,7 +77,7 @@ class GattClientManager (
 
                 try {
                     val userCard = gson.fromJson(json, UserCard::class.java)
-                    onUserCardReceived(userCard)
+                    onUserCardReceived?.invoke(userCard)
                     Log.d("GattClient", "UserCard 파싱 성공 $userCard")
                 } catch (e: Exception) {
                     Log.e("GattClient", "UserCard 파싱 실패", e)

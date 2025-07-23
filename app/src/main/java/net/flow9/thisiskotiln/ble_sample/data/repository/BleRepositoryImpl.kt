@@ -18,7 +18,6 @@ import net.flow9.thisiskotiln.ble_sample.domain.repository.BleRepository
 class BleRepositoryImpl (
     private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter,
-    private val onUserCardReceived: (UserCard) -> Unit
 ) : BleRepository {
 
     private var gattServerManager: GattServerManager? = null
@@ -26,6 +25,17 @@ class BleRepositoryImpl (
     private var bleAdvertiser: BleAdvertiser? = null
     private var bleScanner: BleScanner? = null
     private var myUserCard: UserCard? = null
+
+    private var onUserCardReceived: ((UserCard) -> Unit)? = null
+
+    // 콜백함수를 설정
+    fun setOnUserCardReceivedListener(listener: (UserCard) -> Unit) {
+        onUserCardReceived = listener
+    }
+
+    private fun handleUserCardReceived(card: UserCard) {
+        onUserCardReceived?.invoke(card)
+    }
 
     // BLE Adveriser 객체 생성 및 startAdvertising
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
@@ -88,4 +98,6 @@ class BleRepositoryImpl (
     override fun setUserCard(userCard: UserCard) {
         this.myUserCard = userCard
     }
+
+
 }
