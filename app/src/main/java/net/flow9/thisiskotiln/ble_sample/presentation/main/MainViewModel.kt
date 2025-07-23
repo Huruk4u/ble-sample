@@ -12,21 +12,27 @@ class MainViewModel(
     private val _receivedCard = MutableStateFlow<UserCard?>(null)
     val receivedCard: StateFlow<UserCard?> = _receivedCard
 
-    // BLE 활성화의 상태를 나타내는 변수
-    private val _isBleActivate = MutableStateFlow<Boolean>(false)
-    val isBleActivate: StateFlow<Boolean> = _isBleActivate
+    // Scanning 활성화의 상태를 나타내는 필드
+    private val _isScanning = MutableStateFlow<Boolean>(false)
+    val isScanning: StateFlow<Boolean> = _isScanning
+
+
+    // Advertising 활성화 상태를 나타내는 필드
+    private val _isAdvertising = MutableStateFlow<Boolean>(false)
+    val isAdvertising: StateFlow<Boolean> = _isAdvertising
+
 
     // 데이터를 받아오는 쪽, 굳이 GATT 서버를 열지 않아도 데이터를 받을 수 있다.
     // BLE통신 중앙 역할. 광고한 기기를 탐색한다.
     fun startScanning() {
         bleRepository.startScan()
-        _isBleActivate.value = true
+        _isScanning.value = true
     }
 
     // Scanning 종료
     fun stopScanning() {
         bleRepository.stopScan()
-        _isBleActivate.value = false
+        _isScanning.value = false
     }
 
     // 데이터를 주는 쪽, GATT 서버를 열어서 광고를 한다.
@@ -34,14 +40,14 @@ class MainViewModel(
     fun startAdvertising() {
         bleRepository.startGattServer()
         bleRepository.startAdvertising()
-        _isBleActivate.value = true
+        _isAdvertising.value = true
     }
 
     // Advertising 종료
     fun stopAdvertising() {
         bleRepository.stopAdvertising()
         bleRepository.stopGattServer()
-        _isBleActivate.value = false
+        _isAdvertising.value = false
     }
 
     fun onDeviceFound(device: BluetoothDevice) {
