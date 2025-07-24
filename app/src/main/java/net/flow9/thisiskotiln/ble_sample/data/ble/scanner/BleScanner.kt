@@ -12,6 +12,7 @@ import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import net.flow9.thisiskotlin.ble_sample.data.ble.model.BleConstants
+import java.util.logging.Handler
 
 /**
  * BLE광고를 발견하여 기기를 찾아내고, GATT Client로 서버에 연결을 시도한다.
@@ -20,7 +21,14 @@ class BleScanner (
     private val bluetoothAdapter: BluetoothAdapter,
     private val onDeviceFound: ((BluetoothDevice) -> Unit)?
 ) {
-    private var bluetoothLeScanner: BluetoothLeScanner? = null
+    private val bluetoothLeScanner by lazy {
+        bluetoothAdapter.bluetoothLeScanner
+    }
+
+    private var scanning = true;
+    private val handler = Handler()
+
+    private val SCAN_PERIOD: Long = 10000
 
     // BLE 스캔을 시작한다.
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
@@ -33,11 +41,12 @@ class BleScanner (
         }
 
         // bluetoothLeScanner를 호출한다.
-        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         if (bluetoothLeScanner == null) {
             Log.e("BleScanner", "BLE Scanner 지원하지 않음")
             return
         }
+
+        if (scanning)
 
         // BLE Advertise를 필터링한다.
         // SERVICE UUID가 일치하는 advertise만 필터링 할거임.
@@ -53,7 +62,7 @@ class BleScanner (
             .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
             .build()
 
-        Log.d("BleScanner", "${bluetoothLeScanner}")
+        Log.d("BleScanner", "$bluetoothLeScanner")
         bluetoothLeScanner?.startScan(listOf(filter), settings, scanCallback)
         Log.d("BleScanner", "BLE 스캔 시작")
     }
@@ -61,8 +70,7 @@ class BleScanner (
     // 스캔 종료
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     fun stopScan() {
-        bluetoothLeScanner?.stopScan(scanCallback)
-        bluetoothLeScanner = null
+        bluetoothLeScanner.stopScan(scanCallback)
         Log.d("BleScanner", "BLE 스캔 중지")
 
     }
