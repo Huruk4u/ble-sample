@@ -11,7 +11,7 @@ import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import androidx.compose.animation.scaleOut
+import net.flow9.thisiskotiln.ble_sample.util.PermissionChecker
 import net.flow9.thisiskotlin.ble_sample.data.ble.model.BleConstants
 
 /**
@@ -51,6 +51,7 @@ class BleScanner (
         // BLE 스캔 거리는 짧게 설정
         val settings = ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
             .build()
 
         Log.d("BleScanner", "${bluetoothLeScanner}")
@@ -91,16 +92,7 @@ class BleScanner (
             result?.device?.let { device ->
                 Log.d("BleScanner", "기기 발견 ${device.name}, ${device.address}")
                 onDeviceFound?.invoke(device)
-                stopScan() //
-            }
-        }
-
-        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-        override fun onBatchScanResults(results: List<ScanResult?>?) {
-            super.onBatchScanResults(results)
-            Log.d("BleScanner", "배치 스캔 결과 ${results?.size}")
-            results?.forEach { result ->
-                Log.d("BleScanner", "배치 스캔 결과 ${result?.device?.name}}")
+                stopScan()
             }
         }
     }

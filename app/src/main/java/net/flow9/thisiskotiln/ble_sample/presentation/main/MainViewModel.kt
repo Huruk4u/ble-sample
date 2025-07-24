@@ -1,5 +1,6 @@
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,8 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import net.flow9.thisiskotiln.ble_sample.domain.model.BleDeviceInfo
 import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 import net.flow9.thisiskotiln.ble_sample.domain.repository.BleRepository
+import net.flow9.thisiskotiln.ble_sample.util.PermissionChecker
 
 class MainViewModel(
+    private val context: Context,
     private val bleRepository: BleRepository
 ) : ViewModel() {
 
@@ -21,7 +24,6 @@ class MainViewModel(
     // Scanning 활성화의 상태를 나타내는 필드
     private val _isScanning = MutableStateFlow<Boolean>(false)
     val isScanning: StateFlow<Boolean> = _isScanning
-
 
     // Advertising 활성화 상태를 나타내는 필드
     private val _isAdvertising = MutableStateFlow<Boolean>(false)
@@ -38,6 +40,7 @@ class MainViewModel(
     // 데이터를 받아오는 쪽, 굳이 GATT 서버를 열지 않아도 데이터를 받을 수 있다.
     // BLE통신 중앙 역할. 광고한 기기를 탐색한다.
     fun startScanning() {
+        PermissionChecker.checkBlePermissions(context)
         bleRepository.startScan()
         _isScanning.value = true
     }
@@ -51,7 +54,6 @@ class MainViewModel(
     // 데이터를 주는 쪽, GATT 서버를 열어서 광고를 한다.
     // Gatt Client. Scanner가 찾아오도록 만든다.
     fun startAdvertising() {
-
         bleRepository.setUserCard(myUserCard)
         bleRepository.startGattServer()
 

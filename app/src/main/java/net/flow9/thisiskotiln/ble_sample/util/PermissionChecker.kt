@@ -4,12 +4,24 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 
 //
-class PermissionChecker {
+object PermissionChecker {
+
+    public fun checkBlePermissions(context: Context) {
+        val scan = ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN)
+        val connect = ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
+        val advertise = ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_ADVERTISE)
+        val fine = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarse = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        Log.d("BlePermissionCheck", "BLUETOOTH_SCAN: $scan, BLUETOOTH_CONNECT: $connect, BLUETOOTH_ADVERTISE: $advertise, FINE_LOCATION: $fine, COARSE_LOCATION: $coarse")
+    }
+
 
     // BLE통신을 위한 권한 목록 조회
     fun getRequireBlePermissions(): Array<String> {

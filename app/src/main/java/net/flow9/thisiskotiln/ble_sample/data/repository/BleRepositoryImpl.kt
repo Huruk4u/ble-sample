@@ -26,10 +26,13 @@ class BleRepositoryImpl (
 
     private var gattServerManager: GattServerManager? = null
     private var gattClientManager: GattClientManager? = null
-    private var bleAdvertiser: BleAdvertiser? = null
-    private var bleScanner: BleScanner? = null
     private var myUserCard: UserCard? = null
-
+    private val bleScanner: BleScanner by lazy {
+        BleScanner(bluetoothAdapter, onDeviceFound)
+    }
+    private val bleAdvertiser: BleAdvertiser by lazy {
+        BleAdvertiser(bluetoothAdapter)
+    }
 
     // 넘겨줄 콜백 함수 세팅용
     fun setOnDeviceFoundListener(listner: (BluetoothDevice) -> Unit) {
@@ -51,15 +54,13 @@ class BleRepositoryImpl (
     // BLE Adveriser 객체 생성 및 startAdvertising
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
     override fun startAdvertising() {
-        bleAdvertiser = BleAdvertiser(bluetoothAdapter)
-        bleAdvertiser?.startAdvertising()
+        bleAdvertiser.startAdvertising()
     }
 
     // BLE Adveriser 인스턴스 초기화
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
     override fun stopAdvertising() {
-        bleAdvertiser?.stopAdvertising()
-        bleAdvertiser = null
+        bleAdvertiser.stopAdvertising()
     }
 
     // GATT 서버 열고, context와 userCard를 넘긴다.
@@ -86,16 +87,14 @@ class BleRepositoryImpl (
     ])
     override fun startScan() {
         // Scan도중 콜백함수에서 connectToDevice로 넘긴다.
-        bleScanner = BleScanner(bluetoothAdapter, onDeviceFound)
-        bleScanner?.startScan()
+        bleScanner.startScan()
     }
 
     // ble Scanner 인스턴스 초기화
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     override fun stopScan() {
         gattClientManager?.disconnect()
-        bleScanner?.stopScan()
-        bleScanner = null
+        bleScanner.stopScan()
     }
 
     // 디바이스 발견 시 GATT Client로 연결
@@ -108,5 +107,4 @@ class BleRepositoryImpl (
     override fun setUserCard(userCard: StateFlow<UserCard?>) {
         this.myUserCard = userCard.value
     }
-
 }

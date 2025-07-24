@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // 허용되지 않은 권한 조회 후 권한 요청
-        val missingPermissions = PermissionChecker().getMissingPermissions(this)
+        val missingPermissions = PermissionChecker.getMissingPermissions(this)
         if (missingPermissions.isNotEmpty()) {
             permissionLauncher.launch(missingPermissions)
         }
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
         // Repository, viewModel간 의존 관계 설정
         val bleRepository = BleRepositoryImpl(this@MainActivity, bluetoothAdapter, null, null)
         // viewModel, repository의 상호 의존 관계 때문에 동시에 생성해야함.
-        val viewModel = MainViewModel(bleRepository)
+        val viewModel = MainViewModel(this@MainActivity, bleRepository)
 
         // DI처리, 초기에 null값으로 넘겼던 콜백함수를 세팅함.
         bleRepository.setOnUserCardReceivedListener { receivedCard ->
