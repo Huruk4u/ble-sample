@@ -4,7 +4,9 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.util.Log
 import androidx.annotation.RequiresPermission
+import kotlinx.coroutines.flow.StateFlow
 import net.flow9.thisiskotiln.ble_sample.data.ble.advertiser.BleAdvertiser
 import net.flow9.thisiskotiln.ble_sample.data.ble.gatt.GattClientManager
 import net.flow9.thisiskotiln.ble_sample.data.ble.gatt.GattServerManager
@@ -18,6 +20,8 @@ import net.flow9.thisiskotiln.ble_sample.domain.repository.BleRepository
 class BleRepositoryImpl (
     private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter,
+    private var onUserCardReceived: ((UserCard) -> Unit)?,
+    private var onDeviceFound: ((BluetoothDevice) -> Unit)?,
 ) : BleRepository {
 
     private var gattServerManager: GattServerManager? = null
@@ -26,15 +30,22 @@ class BleRepositoryImpl (
     private var bleScanner: BleScanner? = null
     private var myUserCard: UserCard? = null
 
-    private var onUserCardReceived: ((UserCard) -> Unit)? = null
 
-    // 콜백함수를 설정
+    // 넘겨줄 콜백 함수 세팅용
+    fun setOnDeviceFoundListener(listner: (BluetoothDevice) -> Unit) {
+        onDeviceFound = listner
+    }
+
     fun setOnUserCardReceivedListener(listener: (UserCard) -> Unit) {
         onUserCardReceived = listener
     }
 
     private fun handleUserCardReceived(card: UserCard) {
         onUserCardReceived?.invoke(card)
+    }
+
+    private fun handleDeviceFound(device: BluetoothDevice) {
+        onDeviceFound?.invoke(device)
     }
 
     // BLE Adveriser 객체 생성 및 startAdvertising
@@ -54,6 +65,7 @@ class BleRepositoryImpl (
     // GATT 서버 열고, context와 userCard를 넘긴다.
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun startGattServer() {
+        Log.d("BleRepository", "GATT 서버 시작 ${myUserCard}")
         myUserCard?.let { card ->
             gattServerManager = GattServerManager(context,card)
             gattServerManager?.startGattServer()
@@ -73,20 +85,17 @@ class BleRepositoryImpl (
         Manifest.permission.BLUETOOTH_CONNECT
     ])
     override fun startScan() {
-        gattClientManager = GattClientManager(context, onUserCardReceived)
         // Scan도중 콜백함수에서 connectToDevice로 넘긴다.
-        bleScanner = BleScanner(bluetoothAdapter) { device ->
-            connectToDevice(device)
-        }
+        bleScanner = BleScanner(bluetoothAdapter, onDeviceFound)
         bleScanner?.startScan()
     }
 
     // ble Scanner 인스턴스 초기화
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     override fun stopScan() {
+        gattClientManager?.disconnect()
         bleScanner?.stopScan()
         bleScanner = null
-        gattClientManager?.disconnect()
     }
 
     // 디바이스 발견 시 GATT Client로 연결
@@ -95,10 +104,9 @@ class BleRepositoryImpl (
         gattClientManager?.connectToDevice(device)
     }
 
-    // usercard 세팅
-    override fun setUserCard(userCard: UserCard) {
-        this.myUserCard = userCard
+    // 내가 넘겨줄 유저 카드 정보를 세팅
+    override fun setUserCard(userCard: StateFlow<UserCard?>) {
+        this.myUserCard = userCard.value
     }
-
 
 }

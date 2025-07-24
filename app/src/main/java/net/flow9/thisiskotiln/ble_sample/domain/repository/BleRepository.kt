@@ -1,6 +1,7 @@
 package net.flow9.thisiskotiln.ble_sample.domain.repository
 
 import android.bluetooth.BluetoothDevice
+import kotlinx.coroutines.flow.StateFlow
 import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 
 /**
@@ -20,15 +21,15 @@ interface BleRepository {
     // GATT Server 종료
     fun stopGattServer()
     
-    // BLE Advertise Scan시작
+    // BLE Advertise Scan 시작
     fun startScan()
     
-    // BLE Advertise Scan종료
+    // BLE Advertise Scan 종료
     fun stopScan()
     
     // 디바이스 연결
     fun connectToDevice(device: BluetoothDevice)
 
     // userCard 데이터 바인딩
-    fun setUserCard(userCard: UserCard)
+    fun setUserCard(userCard: StateFlow<UserCard?>)
 }

@@ -11,6 +11,7 @@ import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import androidx.compose.animation.scaleOut
 import net.flow9.thisiskotlin.ble_sample.data.ble.model.BleConstants
 
 /**
@@ -18,7 +19,7 @@ import net.flow9.thisiskotlin.ble_sample.data.ble.model.BleConstants
  */
 class BleScanner (
     private val bluetoothAdapter: BluetoothAdapter,
-    private val onDeviceFound: (BluetoothDevice) -> Unit
+    private val onDeviceFound: ((BluetoothDevice) -> Unit)?
 ) {
     private var bluetoothLeScanner: BluetoothLeScanner? = null
 
@@ -45,11 +46,14 @@ class BleScanner (
             .setServiceUuid(ParcelUuid(BleConstants.SERVICE_UUID))
             .build()
 
+        Log.d("BleScanner", "요구하는 UUID ${BleConstants.SERVICE_UUID}")
+
         // BLE 스캔 거리는 짧게 설정
         val settings = ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
             .build()
 
+        Log.d("BleScanner", "${bluetoothLeScanner}")
         bluetoothLeScanner?.startScan(listOf(filter), settings, scanCallback)
         Log.d("BleScanner", "BLE 스캔 시작")
     }
@@ -80,13 +84,23 @@ class BleScanner (
         @RequiresPermission(allOf = [
             Manifest.permission.BLUETOOTH_SCAN,
             Manifest.permission.BLUETOOTH_CONNECT
-            ])
+        ])
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             super.onScanResult(callbackType, result)
+            Log.d("BleScanner", "스캔 결과")
             result?.device?.let { device ->
                 Log.d("BleScanner", "기기 발견 ${device.name}, ${device.address}")
-                onDeviceFound(device)
+                onDeviceFound?.invoke(device)
                 stopScan() //
+            }
+        }
+
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+        override fun onBatchScanResults(results: List<ScanResult?>?) {
+            super.onBatchScanResults(results)
+            Log.d("BleScanner", "배치 스캔 결과 ${results?.size}")
+            results?.forEach { result ->
+                Log.d("BleScanner", "배치 스캔 결과 ${result?.device?.name}}")
             }
         }
     }

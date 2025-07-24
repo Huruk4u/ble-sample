@@ -11,18 +11,19 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel,
-    myUserCard: UserCard
+    viewModel: MainViewModel
 ) {
     val context = LocalContext.current
 
@@ -33,7 +34,11 @@ fun MainScreen(
     val isAdvertising by viewModel.isAdvertising.collectAsState()
 
     // bluetooth 활성화 여부 체크
+    val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     val bluetoothEnabled = remember { mutableStateOf(checkBluetoothEnabled(context)) }
+
+    // 스캔한 디바이스 결과를 조회하는 상태 필드
+    val scanResults by viewModel.scanResult.collectAsState()
 
     val bluetoothEnableLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -67,7 +72,7 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "내 카드", style = MaterialTheme.typography.titleLarge)
-        Text(text = "${myUserCard.userName} / ${myUserCard.position}")
+        Text(text = "${viewModel.myUserCard.value?.userId} / ${viewModel.myUserCard.value?.userName} / ${viewModel.myUserCard.value?.position}")
 
         // BLE 통신이 활성화 되어있지 않은 상태에서만 버튼을 활성화 한다.
         if (!isScanning && !isAdvertising) {
@@ -77,8 +82,8 @@ fun MainScreen(
                     .fillMaxWidth()
                     .padding(24.dp),
                 onClick = {
-                    if (bluetoothEnabled.value) {
-                        viewModel.startScanning()
+                    if (bluetoothEnabled.value && bluetoothAdapter.isEnabled) {
+                        viewModel.startAdvertising()
                     } else {
                         ensureBluetoothEnabled()
                     }
@@ -90,13 +95,24 @@ fun MainScreen(
                     .fillMaxWidth()
                     .padding(24.dp),
                 onClick = {
-                    if (bluetoothEnabled.value) {
-                        viewModel.startAdvertising()
+                    if (bluetoothEnabled.value && bluetoothAdapter.isEnabled) {
+                        viewModel.startScanning()
                     } else {
                         ensureBluetoothEnabled()
                     }
                 }) { Text("상대 카드를 받아오기") }
         } else {
+
+            if (isScanning) {
+                // 스캔을 시작할 경우에만 동작한다.
+                Text("주변 BLE 기기 목록")
+                LazyColumn {
+                    items(scanResults) { device ->
+                        Text("${device?.name ?: "이름없음"} | ${device?.address}}")
+                    }
+                }
+            }
+
             // 스캔 중이거나 광고 중인 상태라면, 비활성화를 해주는 버튼
             Button(
                 modifier = Modifier

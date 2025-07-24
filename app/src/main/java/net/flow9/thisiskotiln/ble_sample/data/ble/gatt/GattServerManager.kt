@@ -35,6 +35,7 @@ class GattServerManager (
         val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         gattServer = manager.openGattServer(context, gattServerCallback) // Server를 열고 내부 동작은 gattServerCallback에서 정의
 
+        Log.d("GattServer", "GattServer 시작")
         // GattServer에 서비스 추가
         val service = BluetoothGattService(
             BleConstants.SERVICE_UUID,
@@ -76,6 +77,7 @@ class GattServerManager (
             characteristic: BluetoothGattCharacteristic
         ) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic)
+
             // Characteristic UUID가 일치하는지 확인. 일치하면 데이터를 넘겨준다.
             if (characteristic.uuid == BleConstants.CHARACTERISTIC_UUID) {
                 
@@ -87,6 +89,7 @@ class GattServerManager (
                 gattServer?.sendResponse(device, requestId, GATT_SUCCESS, 0, value)
                 Log.d("GattServer", "userCard 전송함: $json")
 
+                // 전송 후에는 connection을 닫는다.
             }
         }
     }

@@ -54,8 +54,9 @@ class BleAdvertiser (
 
         // Advertise데이터 설정
         // 디바이스 명, 서비스 UUID
+        // 동봉?할 수 있는 데이터의 크기가 31바이트로 제한되어있으므로, Device Name을 포함하지 않는다.
         val data = AdvertiseData.Builder()
-            .setIncludeDeviceName(true)
+            .setIncludeDeviceName(false)
             .addServiceUuid(ParcelUuid(BleConstants.SERVICE_UUID))
             .build()
 
