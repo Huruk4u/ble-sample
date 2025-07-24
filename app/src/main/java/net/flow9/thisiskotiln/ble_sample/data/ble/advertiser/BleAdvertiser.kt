@@ -6,9 +6,8 @@ import android.bluetooth.le.AdvertiseCallback
 import android.bluetooth.le.AdvertiseData
 import android.bluetooth.le.AdvertiseSettings
 import android.bluetooth.le.BluetoothLeAdvertiser
-import android.content.Intent
+import android.os.Handler
 import android.os.ParcelUuid
-import android.provider.Settings
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import net.flow9.thisiskotlin.ble_sample.data.ble.model.BleConstants
