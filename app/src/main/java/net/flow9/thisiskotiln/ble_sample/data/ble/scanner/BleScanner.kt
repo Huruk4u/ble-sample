@@ -11,7 +11,6 @@ import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import net.flow9.thisiskotiln.ble_sample.util.PermissionChecker
 import net.flow9.thisiskotlin.ble_sample.data.ble.model.BleConstants
 
 /**

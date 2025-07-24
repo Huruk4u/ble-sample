@@ -90,6 +90,8 @@ class GattServerManager (
                 Log.d("GattServer", "userCard 전송함: $json")
 
                 // 전송 후에는 connection을 닫는다.
+                // 원래 이쪽에서 콜백함수를 호출해야 할 것 같은데 그냥 임시조치임
+                stopGattServer()
             }
         }
     }
