@@ -9,6 +9,8 @@ import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.google.gson.Gson
@@ -49,9 +51,13 @@ class GattServerManager (
             BluetoothGattCharacteristic.PROPERTY_READ,
             BluetoothGattCharacteristic.PERMISSION_READ
         )
-        
+
+        Log.d("GattServer", "GattServer 서비스 추가 ${service.uuid}")
+        Log.d("GattServer", "Gatt Characteristic 추가 ${characteristic.uuid}")
         service.addCharacteristic(characteristic) // 서비스에 Characteristic 추가
-        gattServer?.addService(service) // GattServer에 서비스 추가
+        gattServer?.addService(service)?.also {
+            Log.d("GattServer", "서비스 등록 요청 결과: $it")
+        }
     }
 
     /**
@@ -89,9 +95,11 @@ class GattServerManager (
                 gattServer?.sendResponse(device, requestId, GATT_SUCCESS, 0, value)
                 Log.d("GattServer", "userCard 전송함: $json")
 
-                // 전송 후에는 connection을 닫는다.
-                // 원래 이쪽에서 콜백함수를 호출해야 할 것 같은데 그냥 임시조치임
-                stopGattServer()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    // 전송 후에는 connection을 닫는다.
+                    // 원래 이쪽에서 콜백함수를 호출해야 할 것 같은데 그냥 임시조치임
+                    stopGattServer()
+                }, 1000)
             }
         }
     }

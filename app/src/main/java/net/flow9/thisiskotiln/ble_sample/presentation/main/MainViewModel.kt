@@ -1,5 +1,8 @@
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,11 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import net.flow9.thisiskotiln.ble_sample.domain.model.BleDeviceInfo
 import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 import net.flow9.thisiskotiln.ble_sample.domain.repository.BleRepository
+import net.flow9.thisiskotiln.ble_sample.util.PermissionChecker
 
 class MainViewModel(
+    private val context: Context,
     private val bleRepository: BleRepository
 ) : ViewModel() {
-
     private val _myUserCard = MutableStateFlow<UserCard?>(null)
     val myUserCard: StateFlow<UserCard?> = _myUserCard
 
@@ -50,19 +54,25 @@ class MainViewModel(
     // 데이터를 주는 쪽, GATT 서버를 열어서 광고를 한다.
     // Gatt Client. Scanner가 찾아오도록 만든다.
     fun startAdvertising() {
+        // 허용된 권한 목록 체크하기
+        PermissionChecker.checkBlePermissions(context)
+        
         bleRepository.setUserCard(myUserCard)
 
-        bleRepository.startAdvertising()
         bleRepository.startGattServer()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            bleRepository.startAdvertising()
+        }, 300)
 
         _isAdvertising.value = true
     }
 
     // Advertising 종료
     fun stopAdvertising() {
-        bleRepository.stopGattServer()
         bleRepository.stopAdvertising()
         _isAdvertising.value = false
+        bleRepository.stopGattServer()
     }
 
     @SuppressLint("MissingPermission")

@@ -28,20 +28,24 @@ class BleRepositoryImpl (
     private var gattClientManager: GattClientManager? = null
     private var myUserCard: UserCard? = null
 
-    private lateinit var bleAdvertiser: BleAdvertiser
-    private lateinit var bleScanner: BleScanner
+    private var bleAdvertiser: BleAdvertiser
+    private var bleScanner: BleScanner
 
     init {
-        bleAdvertiser = BleAdvertiser(context, bluetoothAdapter)
-        bleScanner = BleScanner(bluetoothAdapter, onDeviceFound)
+        bleScanner = BleScanner(bluetoothAdapter, null)
+        bleAdvertiser = BleAdvertiser(bluetoothAdapter)
     }
 
     fun setOnUserCardReceivedListener(listener: (UserCard) -> Unit) {
+        Log.d("BleRepository", "onUserCardReceivedListener 설정 $listener")
         onUserCardReceived = listener
+        gattClientManager = GattClientManager(context, onUserCardReceived)
     }
 
     fun setOnDeviceFoundListener(listener: (BluetoothDevice) -> Unit) {
+        Log.d("BleRepository", "onDeviceFoundListener 설정 $listener")
         onDeviceFound = listener
+        bleScanner = BleScanner(bluetoothAdapter, onDeviceFound)
     }
 
     // GATT 서버 열고, context와 userCard를 넘긴다.
@@ -90,6 +94,8 @@ class BleRepositoryImpl (
     // 디바이스 발견 시 GATT Client로 연결
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun connectToDevice(device: BluetoothDevice) {
+        // 로그 꼬일 수 있어서 disconnect하고 들어감
+        gattClientManager?.disconnect()
         gattClientManager?.connectToDevice(device)
     }
 

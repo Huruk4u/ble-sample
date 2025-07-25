@@ -18,11 +18,9 @@ import net.flow9.thisiskotlin.ble_sample.data.ble.model.BleConstants
  * GATT 서버를 열고 나서, 플루딩을 수행하기 위한 Advertiser 클래스
  */
 class BleAdvertiser (
-    private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter,
 ) {
     private var bluetoothLeAdvertiser: BluetoothLeAdvertiser? = null
-    private var gattServerManager: GattServerManager? = null
 
     /**
      * Advertising을 시작한다.

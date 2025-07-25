@@ -54,10 +54,17 @@ class GattClientManager (
         override fun onServicesDiscovered( gatt: BluetoothGatt?, status: Int ) {
             super.onServicesDiscovered(gatt, status)
 
+            Log.d("GattClient", "요구 서비스 uuid${BleConstants.SERVICE_UUID}")
+            Log.d("GattClient", "요구 특성 uuid${BleConstants.CHARACTERISTIC_UUID}")
+
             // BleConstants에 정의된 SERVICE UUID, CHARACTERISTIC UUID가 일치하는지 확인
             val service = gatt?.getService(BleConstants.SERVICE_UUID)
             val characteristic = service?.getCharacteristic(BleConstants.CHARACTERISTIC_UUID)
+            Log.d("GattClient", "device name : ${gatt?.device?.name}")
+            Log.d("GattClient", "service uuid : ${service?.uuid}")
+            Log.d("GattClient", "characteristic uuid : ${characteristic?.uuid}")
 
+            Log.d("GattClient", "서비스 탐색 성공")
             // 만약 일치하는 characteristic을 발견했다면, GATT 서버로부터 데이터를 요청한다.
             if (characteristic != null) {
                 gatt.readCharacteristic(characteristic)
@@ -68,9 +75,10 @@ class GattClientManager (
         }
 
         // GATT 서버로부터 Characteristic을 읽을 때 호출되는 함수
-        override fun onCharacteristicRead( gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int ) {
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+        override fun onCharacteristicRead(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int ) {
             super.onCharacteristicRead(gatt, characteristic, status)
-
+            Log.d("GattClient", "$status, ${BluetoothGatt.GATT_SUCCESS}")
             // 서버의 응답이 GATT_SUCCESS이고, characteristic의 UUID가 일치한다면, 데이터를 json으로 변환
             if (status == BluetoothGatt.GATT_SUCCESS && characteristic?.uuid == BleConstants.CHARACTERISTIC_UUID) {
                 val json = characteristic.value?.toString(Charsets.UTF_8)
@@ -83,6 +91,8 @@ class GattClientManager (
                 } catch (e: Exception) {
                     Log.e("GattClient", "UserCard 파싱 실패", e)
                 }
+
+                disconnect()
             }
         }
     }

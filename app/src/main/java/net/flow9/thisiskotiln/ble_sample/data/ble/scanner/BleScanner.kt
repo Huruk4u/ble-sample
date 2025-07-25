@@ -55,6 +55,7 @@ class BleScanner (
             // BLE 스캔 거리는 짧게 설정
             val settings = ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
                 .build()
 
             Log.d("BleScanner", "${bluetoothLeScanner}")
@@ -100,6 +101,7 @@ class BleScanner (
 
             result?.device?.let { device ->
                 Log.d("BleScanner", "기기 발견 ${device.name}, ${device.address}")
+                Log.d("BleScanner", "${onDeviceFound}")
                 onDeviceFound?.invoke(device)
                 stopScan()
             }

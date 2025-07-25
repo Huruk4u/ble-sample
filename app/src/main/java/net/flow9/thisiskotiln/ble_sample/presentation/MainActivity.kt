@@ -1,24 +1,13 @@
 package net.flow9.thisiskotiln.ble_sample.presentation
 
 import MainViewModel
-import android.Manifest
 import android.bluetooth.BluetoothAdapter
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.core.content.ContextCompat
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import net.flow9.thisiskotiln.ble_sample.data.repository.BleRepositoryImpl
 import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 import net.flow9.thisiskotiln.ble_sample.presentation.main.MainScreen
@@ -44,8 +33,9 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // 허용되지 않은 권한 조회 후 권한 요청
+        // 허용되지 않은 권한 조회 후 권한 요청, 초기 상태면 여기에 4개의 권한이 모두 들어가 있어야되는데.
         val missingPermissions = PermissionChecker.getMissingPermissions(this)
+
         if (missingPermissions.isNotEmpty()) {
             permissionLauncher.launch(missingPermissions)
         }
@@ -53,7 +43,8 @@ class MainActivity : ComponentActivity() {
         val bleRepository = BleRepositoryImpl(this, bluetoothAdapter, null, null)
 
         // viewModel 생성
-        val viewModel = MainViewModel(bleRepository)
+        val viewModel = MainViewModel(this@MainActivity, bleRepository)
+
         viewModel.setMyUserCard(UserCard(1, "seongminYoo", "Backend Engineer"))
 
         bleRepository.setOnUserCardReceivedListener { viewModel.onUserCardReceived(it) }

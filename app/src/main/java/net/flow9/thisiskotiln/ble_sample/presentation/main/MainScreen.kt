@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import android.location.LocationManager
+
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -35,7 +38,9 @@ fun MainScreen(
 
     // bluetooth 활성화 여부 체크
     val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-    val bluetoothEnabled = remember { mutableStateOf(checkBluetoothEnabled(context)) }
+    val bluetoothEnabled = remember { mutableStateOf(checkBluetoothEnabled(context) ) }
+
+    val gpsEnabled = remember { mutableStateOf(checkGpsEnabled(context ) ) }
 
     // 스캔한 디바이스 결과를 조회하는 상태 필드
     val scanResults by viewModel.scanResult.collectAsState()
@@ -64,6 +69,14 @@ fun MainScreen(
         }
     }
 
+    // GPS 활성화 여부 체크
+    fun ensureGpsEnabled() {
+        if (!gpsEnabled.value) {
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            context.startActivity(intent) // 시스템 위치 설정 화면으로 이동
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -82,12 +95,13 @@ fun MainScreen(
                     .fillMaxWidth()
                     .padding(24.dp),
                 onClick = {
-                    if (bluetoothEnabled.value && bluetoothAdapter.isEnabled) {
+                    if (checkBluetoothEnabled(context) && checkGpsEnabled(context) && bluetoothAdapter.isEnabled) {
                         viewModel.startAdvertising()
                     } else {
                         ensureBluetoothEnabled()
+                        ensureGpsEnabled()
                     }
-                    }) { Text("내 카드 주기") }
+                }) { Text("내 카드 주기") }
 
             // BLE 주변 기기, Advertising버튼
             Button(
@@ -95,10 +109,11 @@ fun MainScreen(
                     .fillMaxWidth()
                     .padding(24.dp),
                 onClick = {
-                    if (bluetoothEnabled.value && bluetoothAdapter.isEnabled) {
+                    if (checkBluetoothEnabled(context) && checkGpsEnabled(context) && bluetoothAdapter.isEnabled) {
                         viewModel.startScanning()
                     } else {
                         ensureBluetoothEnabled()
+                        ensureGpsEnabled()
                     }
                 }) { Text("상대 카드를 받아오기") }
         } else {
@@ -145,3 +160,9 @@ fun checkBluetoothEnabled(context: Context): Boolean {
     val bluetoothAdapter = bluetoothManager.adapter
     return bluetoothAdapter?.isEnabled == true
 }
+
+fun checkGpsEnabled(context: Context): Boolean {
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+}
+
