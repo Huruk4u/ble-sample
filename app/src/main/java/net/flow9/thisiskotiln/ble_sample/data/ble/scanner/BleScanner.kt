@@ -26,8 +26,6 @@ class BleScanner (
     // 스캐너의 중복 호출을 방지하기 위함.
     private var scanning = false
 
-    private val handler : Handler = Handler()
-
     // BLE 스캔을 시작한다.
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     fun startScan() {
@@ -57,7 +55,6 @@ class BleScanner (
             // BLE 스캔 거리는 짧게 설정
             val settings = ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
                 .build()
 
             Log.d("BleScanner", "${bluetoothLeScanner}")
@@ -99,7 +96,8 @@ class BleScanner (
         ])
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             super.onScanResult(callbackType, result)
-            Log.d("BleScanner", "스캔 결과")
+            Log.d("BleScanner", "스캔 결과 $result")
+
             result?.device?.let { device ->
                 Log.d("BleScanner", "기기 발견 ${device.name}, ${device.address}")
                 onDeviceFound?.invoke(device)

@@ -79,7 +79,6 @@ class GattClientManager (
                 try {
                     val userCard = gson.fromJson(json, UserCard::class.java)
                     onUserCardReceived?.invoke(userCard)
-                    Toast.makeText(context, "수신 성공", Toast.LENGTH_SHORT).show()
                     Log.d("GattClient", "UserCard 파싱 성공 $userCard")
                 } catch (e: Exception) {
                     Log.e("GattClient", "UserCard 파싱 실패", e)

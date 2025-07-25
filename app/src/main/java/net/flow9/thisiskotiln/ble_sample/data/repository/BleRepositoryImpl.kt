@@ -27,28 +27,35 @@ class BleRepositoryImpl (
     private var gattServerManager: GattServerManager? = null
     private var gattClientManager: GattClientManager? = null
     private var myUserCard: UserCard? = null
-    private val bleScanner: BleScanner by lazy {
-        BleScanner(bluetoothAdapter, onDeviceFound)
-    }
-    private val bleAdvertiser: BleAdvertiser by lazy {
-        BleAdvertiser(bluetoothAdapter)
-    }
 
-    // 넘겨줄 콜백 함수 세팅용
-    fun setOnDeviceFoundListener(listner: (BluetoothDevice) -> Unit) {
-        onDeviceFound = listner
+    private lateinit var bleAdvertiser: BleAdvertiser
+    private lateinit var bleScanner: BleScanner
+
+    init {
+        bleAdvertiser = BleAdvertiser(context, bluetoothAdapter)
+        bleScanner = BleScanner(bluetoothAdapter, onDeviceFound)
     }
 
     fun setOnUserCardReceivedListener(listener: (UserCard) -> Unit) {
         onUserCardReceived = listener
     }
 
-    private fun handleUserCardReceived(card: UserCard) {
-        onUserCardReceived?.invoke(card)
+    fun setOnDeviceFoundListener(listener: (BluetoothDevice) -> Unit) {
+        onDeviceFound = listener
     }
 
-    private fun handleDeviceFound(device: BluetoothDevice) {
-        onDeviceFound?.invoke(device)
+    // GATT 서버 열고, context와 userCard를 넘긴다.
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override fun startGattServer() {
+        Log.d("BleRepository", "GATT 서버 시작 $myUserCard")
+        gattServerManager = GattServerManager(context, myUserCard!!)
+        gattServerManager?.startGattServer()
+    }
+
+    // GATT 서버 매니저 인스턴스 초기화
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override fun stopGattServer() {
+        gattServerManager?.stopGattServer()
     }
 
     // BLE Adveriser 객체 생성 및 startAdvertising
@@ -61,23 +68,6 @@ class BleRepositoryImpl (
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
     override fun stopAdvertising() {
         bleAdvertiser.stopAdvertising()
-    }
-
-    // GATT 서버 열고, context와 userCard를 넘긴다.
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun startGattServer() {
-        Log.d("BleRepository", "GATT 서버 시작 ${myUserCard}")
-        myUserCard?.let { card ->
-            gattServerManager = GattServerManager(context,card)
-            gattServerManager?.startGattServer()
-        }
-    }
-
-    // GATT 서버 매니저 인스턴스 초기화
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun stopGattServer() {
-        gattServerManager?.stopGattServer()
-        gattServerManager = null
     }
 
     // GATT 클라이언트 인스턴스 선언 및 할당, bleScanner 선언 및 connectToDevice로 넘김

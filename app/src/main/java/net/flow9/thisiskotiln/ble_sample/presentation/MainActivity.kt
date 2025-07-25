@@ -12,6 +12,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,21 +50,14 @@ class MainActivity : ComponentActivity() {
             permissionLauncher.launch(missingPermissions)
         }
 
-        // Repository, viewModel간 의존 관계 설정
-        val bleRepository = BleRepositoryImpl(this@MainActivity, bluetoothAdapter, null, null)
-        // viewModel, repository의 상호 의존 관계 때문에 동시에 생성해야함.
-        val viewModel = MainViewModel(this@MainActivity, bleRepository)
+        val bleRepository = BleRepositoryImpl(this, bluetoothAdapter, null, null)
 
-        // DI처리, 초기에 null값으로 넘겼던 콜백함수를 세팅함.
-        bleRepository.setOnUserCardReceivedListener { receivedCard ->
-            viewModel.onUserCardReceived(receivedCard)
-        }
-
-        bleRepository.setOnDeviceFoundListener { device ->
-            viewModel.onDeviceFound(device)
-        }
-
+        // viewModel 생성
+        val viewModel = MainViewModel(bleRepository)
         viewModel.setMyUserCard(UserCard(1, "seongminYoo", "Backend Engineer"))
+
+        bleRepository.setOnUserCardReceivedListener { viewModel.onUserCardReceived(it) }
+        bleRepository.setOnDeviceFoundListener { viewModel.onDeviceFound(it) }
 
         setContent {
             Ble_sampleTheme {

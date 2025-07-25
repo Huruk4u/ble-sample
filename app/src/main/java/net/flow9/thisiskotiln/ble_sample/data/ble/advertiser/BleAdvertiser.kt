@@ -6,20 +6,23 @@ import android.bluetooth.le.AdvertiseCallback
 import android.bluetooth.le.AdvertiseData
 import android.bluetooth.le.AdvertiseSettings
 import android.bluetooth.le.BluetoothLeAdvertiser
-import android.os.Handler
+import android.content.Context
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import net.flow9.thisiskotiln.ble_sample.data.ble.gatt.GattServerManager
+import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 import net.flow9.thisiskotlin.ble_sample.data.ble.model.BleConstants
 
 /**
  * GATT 서버를 열고 나서, 플루딩을 수행하기 위한 Advertiser 클래스
  */
 class BleAdvertiser (
-    private val bluetoothAdapter: BluetoothAdapter
+    private val context: Context,
+    private val bluetoothAdapter: BluetoothAdapter,
 ) {
-
     private var bluetoothLeAdvertiser: BluetoothLeAdvertiser? = null
+    private var gattServerManager: GattServerManager? = null
 
     /**
      * Advertising을 시작한다.
@@ -28,26 +31,13 @@ class BleAdvertiser (
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
     fun startAdvertising() {
-        // bluetooth가 활성화 되어있지 않다면 return
-        if (!bluetoothAdapter.isEnabled) {
-            Log.e("BleAdvertiser", "Bluetooth가 비활성화 된 상태입니다.")
-            return
-        }
-
         // bluetoothLeAdvertiser를 호출한다.
         bluetoothLeAdvertiser = bluetoothAdapter.bluetoothLeAdvertiser
-
-        // bluetoothLeAdvertiser가 null이라면 return
-        if (bluetoothLeAdvertiser == null) {
-            Log.e("BleAdvertiser", "BLE Advertiser를 지원하지 않는 기기입니다.")
-            return
-        }
 
         // Advertise 옵션을 세팅한다.
         // 근거리 통신, 전송 세기 높게, connect option true로 설정
         val settings = AdvertiseSettings.Builder()
             .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
             .setConnectable(true)
             .build()
 
@@ -63,7 +53,6 @@ class BleAdvertiser (
         bluetoothLeAdvertiser?.startAdvertising(settings, data, advertisingCallback)
         Log.d("BleAdvertiser", "BLE 광고 시작")
     }
-
 
     // BLE advertising 중지
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
@@ -86,6 +75,7 @@ class BleAdvertiser (
             Log.e("BleAdvertiser", "BLE 광고 시작 실패 : $reason")
         }
 
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
             super.onStartSuccess(settingsInEffect)
             Log.d("BleAdvertiser", "BLE 광고 시작 성공")
