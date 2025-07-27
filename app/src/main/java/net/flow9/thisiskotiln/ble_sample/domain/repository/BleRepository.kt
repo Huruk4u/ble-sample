@@ -32,4 +32,8 @@ interface BleRepository {
 
     // userCard 데이터 바인딩
     fun setUserCard(userCard: StateFlow<UserCard?>)
+
+    fun setOnUserCardReceivedListener(listener: (UserCard) -> Unit)
+
+    fun setOnDeviceFoundListener(listener: (BluetoothDevice) -> Unit)
 }

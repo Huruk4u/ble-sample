@@ -1,24 +1,23 @@
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import net.flow9.thisiskotiln.ble_sample.data.repository.BleRepositoryImpl
 import net.flow9.thisiskotiln.ble_sample.domain.model.BleDeviceInfo
 import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 import net.flow9.thisiskotiln.ble_sample.domain.repository.BleRepository
 import javax.inject.Inject
 
+@HiltViewModel
 class MainViewModel @Inject constructor(
-    private val bleRepository: BleRepositoryImpl
+    private val bleRepository: BleRepository
 ) : ViewModel() {
 
     init {

@@ -1,22 +1,22 @@
 package net.flow9.thisiskotiln.ble_sample
 
 import MainViewModel
-import android.bluetooth.BluetoothAdapter
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import net.flow9.thisiskotiln.ble_sample.data.repository.BleRepositoryImpl
-import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
+import androidx.activity.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import net.flow9.thisiskotiln.ble_sample.presentation.main.MainScreen
 import net.flow9.thisiskotiln.ble_sample.ui.theme.Ble_sampleTheme
 import net.flow9.thisiskotiln.ble_sample.util.PermissionChecker
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,21 +40,9 @@ class MainActivity : ComponentActivity() {
             permissionLauncher.launch(missingPermissions)
         }
 
-        val bleRepository = BleRepositoryImpl(this, bluetoothAdapter, null, null)
-
-        // viewModel 생성
-        val viewModel = MainViewModel(this@MainActivity, bleRepository)
-
-        viewModel.setMyUserCard(UserCard(1, "seongminYoo", "Backend Engineer"))
-
-        bleRepository.setOnUserCardReceivedListener { viewModel.onUserCardReceived(it) }
-        bleRepository.setOnDeviceFoundListener { viewModel.onDeviceFound(it) }
-
         setContent {
             Ble_sampleTheme {
-                MainScreen(
-                    viewModel = viewModel
-                )
+                MainScreen(viewModel = viewModel)
             }
         }
     }

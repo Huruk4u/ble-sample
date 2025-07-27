@@ -19,7 +19,6 @@ import net.flow9.thisiskotiln.ble_sample.data.ble.gatt.GattServerManager
 import net.flow9.thisiskotiln.ble_sample.data.ble.scanner.BleScanner
 import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 import net.flow9.thisiskotiln.ble_sample.domain.repository.BleRepository
-import java.nio.channels.IllegalChannelGroupException
 import javax.inject.Inject
 
 /**
@@ -68,12 +67,12 @@ class BleRepositoryImpl @Inject constructor(
         }
     }
 
-    fun setOnUserCardReceivedListener(listener: (UserCard) -> Unit) {
+    override fun setOnUserCardReceivedListener(listener: (UserCard) -> Unit) {
         onUserCardReceived = listener
         if (gattClientManager == null) gattClientManager = GattClientManager(context, onUserCardReceived)
     }
 
-    fun setOnDeviceFoundListener(listener: (BluetoothDevice) -> Unit) {
+    override fun setOnDeviceFoundListener(listener: (BluetoothDevice) -> Unit) {
         onDeviceFound = listener
         if (!::bleScanner.isInitialized) {
             bleScanner = BleScanner(bluetoothAdapter, listener)
