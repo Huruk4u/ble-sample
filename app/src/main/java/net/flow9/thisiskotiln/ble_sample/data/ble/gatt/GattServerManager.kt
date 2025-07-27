@@ -84,6 +84,7 @@ class GattServerManager (
         ) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic)
 
+
             // Characteristic UUID가 일치하는지 확인. 일치하면 데이터를 넘겨준다.
             if (characteristic.uuid == BleConstants.CHARACTERISTIC_UUID) {
                 
@@ -92,14 +93,14 @@ class GattServerManager (
                 val value = json.toByteArray(Charsets.UTF_8)
                 
                 // Response 보내기
-                gattServer?.sendResponse(device, requestId, GATT_SUCCESS, 0, value)
+                val response = gattServer?.sendResponse(device, requestId, GATT_SUCCESS, 0, value)
                 Log.d("GattServer", "userCard 전송함: $json")
+                Log.d("GattServer", "sendResponse 반환값 $response")
 
+                // GATT 서버 간 타이밍 문제가 발생하는 것 같아서 닫는 속도 늦춤. 넉넉하게 5초 준다.
                 Handler(Looper.getMainLooper()).postDelayed({
-                    // 전송 후에는 connection을 닫는다.
-                    // 원래 이쪽에서 콜백함수를 호출해야 할 것 같은데 그냥 임시조치임
                     stopGattServer()
-                }, 1000)
+                }, 5000)
             }
         }
     }

@@ -28,6 +28,8 @@ class GattClientManager (
     // bluetoothGatt에 connect 할당
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connectToDevice(device: BluetoothDevice) {
+        disconnect()
+
         bluetoothGatt = device.connectGatt(context, false, gattCallback)
     }
 
@@ -66,11 +68,11 @@ class GattClientManager (
 
             Log.d("GattClient", "서비스 탐색 성공")
             // 만약 일치하는 characteristic을 발견했다면, GATT 서버로부터 데이터를 요청한다.
-            if (characteristic != null) {
+            if (characteristic != null && characteristic.isReadable()) {
                 gatt.readCharacteristic(characteristic)
             } else {
                 // 일치하는 characteristic을 발견하지 못했다면 로그 출력
-                Log.e("GattClient", "CHARACTERISTIC UUID 일치하지 않음")
+                Log.e("GattClient", "CHARACTERISTIC 유효하지 않아.")
             }
         }
 
@@ -79,6 +81,7 @@ class GattClientManager (
         override fun onCharacteristicRead(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int ) {
             super.onCharacteristicRead(gatt, characteristic, status)
             Log.d("GattClient", "$status, ${BluetoothGatt.GATT_SUCCESS}")
+
             // 서버의 응답이 GATT_SUCCESS이고, characteristic의 UUID가 일치한다면, 데이터를 json으로 변환
             if (status == BluetoothGatt.GATT_SUCCESS && characteristic?.uuid == BleConstants.CHARACTERISTIC_UUID) {
                 val json = characteristic.value?.toString(Charsets.UTF_8)
@@ -91,7 +94,9 @@ class GattClientManager (
                 } catch (e: Exception) {
                     Log.e("GattClient", "UserCard 파싱 실패", e)
                 }
-
+                disconnect()
+            } else {
+                Log.e("GattClient", "Characteristic을 읽는데 실패했습니다.")
                 disconnect()
             }
         }
@@ -104,4 +109,11 @@ class GattClientManager (
         bluetoothGatt?.close()
         bluetoothGatt = null
     }
+
+    // Characteristic의 유효성 검사
+    fun BluetoothGattCharacteristic.isReadable(): Boolean {
+        return properties and BluetoothGattCharacteristic.PROPERTY_READ != 0
+    }
+
+
 }

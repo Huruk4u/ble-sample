@@ -8,7 +8,6 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
-import android.os.Handler
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.annotation.RequiresPermission
@@ -31,6 +30,7 @@ class BleScanner (
     fun startScan() {
 
         Log.d("BleScanner", "스캔 호출")
+
         if (!scanning) {
             // bluetooth활성화 여부 검사
             if (!bluetoothAdapter.isEnabled) {
@@ -59,7 +59,7 @@ class BleScanner (
                 .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
                 .build()
 
-            Log.d("BleScanner", "${bluetoothLeScanner}")
+            Log.d("BleScanner", "$bluetoothLeScanner")
             bluetoothLeScanner?.startScan(listOf(filter), settings, scanCallback)
             scanning = true
             Log.d("BleScanner", "BLE 스캔 시작")
@@ -102,7 +102,7 @@ class BleScanner (
 
             result?.device?.let { device ->
                 Log.d("BleScanner", "기기 발견 ${device.name?:"이름 없음"}, ${device.address}")
-                Log.d("BleScanner", "${onDeviceFound}")
+                Log.d("BleScanner", "$onDeviceFound")
                 onDeviceFound?.invoke(device)
                 stopScan()
             }
