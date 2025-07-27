@@ -1,4 +1,4 @@
-package net.flow9.thisiskotiln.ble_sample.presentation
+package net.flow9.thisiskotiln.ble_sample
 
 import MainViewModel
 import android.bluetooth.BluetoothAdapter

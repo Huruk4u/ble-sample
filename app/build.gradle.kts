@@ -2,8 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("dagger.hilt.android.plugin")
-    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -61,9 +61,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     implementation("com.google.code.gson:gson:2.13.1")
-
-    // https://mvnrepository.com/artifact/com.google.accompanist/accompanist-permissions
-    implementation("com.google.accompanist:accompanist-permissions:0.37.3")
 
     // https://mvnrepository.com/artifact/com.google.dagger/hilt-android
     runtimeOnly("com.google.dagger:hilt-android:2.56.2")
