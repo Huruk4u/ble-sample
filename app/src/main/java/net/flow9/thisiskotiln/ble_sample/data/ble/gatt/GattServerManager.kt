@@ -36,8 +36,8 @@ class GattServerManager (
         // manager : BluetoothManager, Gatt Server 인스턴스 호출
         val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         gattServer = manager.openGattServer(context, gattServerCallback) // Server를 열고 내부 동작은 gattServerCallback에서 정의
-
         Log.d("GattServer", "GattServer 시작")
+
         // GattServer에 서비스 추가
         val service = BluetoothGattService(
             BleConstants.SERVICE_UUID,
@@ -109,5 +109,6 @@ class GattServerManager (
     fun stopGattServer() {
         gattServer?.close()
         gattServer = null
+        Log.d("GattServerManager", "서버 정상 종료")
     }
 }

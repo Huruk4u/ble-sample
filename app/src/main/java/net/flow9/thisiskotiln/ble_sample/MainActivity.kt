@@ -19,8 +19,6 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private val userCard = UserCard(1, "seongminYoo", "Backend Engineer")
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,7 +34,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // 허용되지 않은 권한 조회 후 권한 요청, 초기 상태면 여기에 4개의 권한이 모두 들어가 있어야되는데.
         val missingPermissions = PermissionChecker.getMissingPermissions(this)
 
         if (missingPermissions.isNotEmpty()) {

@@ -30,6 +30,7 @@ class BleScanner (
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     fun startScan() {
 
+        Log.d("BleScanner", "스캔 호출")
         if (!scanning) {
             // bluetooth활성화 여부 검사
             if (!bluetoothAdapter.isEnabled) {
