@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
+import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 import net.flow9.thisiskotiln.ble_sample.presentation.main.MainScreen
 import net.flow9.thisiskotiln.ble_sample.presentation.main.MainViewModel
 import net.flow9.thisiskotiln.ble_sample.ui.theme.Ble_sampleTheme
@@ -17,6 +18,8 @@ import net.flow9.thisiskotiln.ble_sample.util.PermissionChecker
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
+
+    private val userCard = UserCard(1, "seongminYoo", "Backend Engineer")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +42,8 @@ class MainActivity : ComponentActivity() {
         if (missingPermissions.isNotEmpty()) {
             permissionLauncher.launch(missingPermissions)
         }
+
+        viewModel.setMyUserCard(UserCard(1, "seongminYoo", "Backend Engineer"))
 
         setContent {
             Ble_sampleTheme {
