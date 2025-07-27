@@ -49,23 +49,6 @@ class BleRepositoryImpl @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    // BLE Advertiser의 초기 선언을 위해 발생하는 함수
-    private fun initBleAdvertiserIfNeeded() {
-        if (!::bleAdvertiser.isInitialized) {
-            bleAdvertiser = BleAdvertiser(bluetoothAdapter)
-        }
-    }
-
-    // BLE Scanner의 초기 선언을 위해 발생하는 함수
-    private fun initBleScannerIfNeeded() {
-        if (!::bleScanner.isInitialized) {
-            if (onDeviceFound != null) {
-                bleScanner = BleScanner(bluetoothAdapter, onDeviceFound!!)
-            } else {
-                throw IllegalStateException("onDeviceFound가 설정되지 않았음.")
-            }
-        }
-    }
 
     override fun setOnUserCardReceivedListener(listener: (UserCard) -> Unit) {
         onUserCardReceived = listener
@@ -103,7 +86,6 @@ class BleRepositoryImpl @Inject constructor(
     // BLE Adveriser 객체 생성 및 startAdvertising
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
     override fun startAdvertising() {
-        initBleAdvertiserIfNeeded()
         bleAdvertiser.startAdvertising()
     }
 
@@ -124,9 +106,8 @@ class BleRepositoryImpl @Inject constructor(
         Manifest.permission.BLUETOOTH_CONNECT
     ])
     override fun startScan() {
-        if (gattServerManager != null) stopGattServer()
-
-        initBleScannerIfNeeded()
+        if (onDeviceFound == null) return
+        bleScanner = BleScanner(bluetoothAdapter, onDeviceFound!!)
         bleScanner.startScan()
     }
 
@@ -138,11 +119,9 @@ class BleRepositoryImpl @Inject constructor(
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     override fun stopScan() {
         scope.launch {
-            if (gattClientManager != null) {
-                gattClientManager?.disconnect()
-                delay(100)
-                bleScanner.stopScan()
-            }
+            gattClientManager?.disconnect()
+            delay(100)
+            bleScanner.stopScan()
         }
     }
 

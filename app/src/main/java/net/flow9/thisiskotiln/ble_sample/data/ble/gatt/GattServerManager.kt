@@ -28,6 +28,10 @@ class GattServerManager (
     private var gattServer: BluetoothGattServer? = null
     private val gson = Gson();
 
+    // 단일 응답을 유지하기 위함.
+    // 한 번 응답 이후 서버는 닫힌다.
+    private var alreadyResponsed = false
+
     /**
      * GattServer를 시작한다.
      */
@@ -84,7 +88,10 @@ class GattServerManager (
         ) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic)
 
-
+            if (alreadyResponsed) {
+                Log.d("GattServer", "이미 응답을 완료함")
+                return
+            }
             // Characteristic UUID가 일치하는지 확인. 일치하면 데이터를 넘겨준다.
             if (characteristic.uuid == BleConstants.CHARACTERISTIC_UUID) {
                 
@@ -96,7 +103,7 @@ class GattServerManager (
                 val response = gattServer?.sendResponse(device, requestId, GATT_SUCCESS, 0, value)
                 Log.d("GattServer", "userCard 전송함: $json")
                 Log.d("GattServer", "sendResponse 반환값 $response")
-
+                alreadyResponsed = true
                 // GATT 서버 간 타이밍 문제가 발생하는 것 같아서 닫는 속도 늦춤. 넉넉하게 5초 준다.
                 Handler(Looper.getMainLooper()).postDelayed({
                     stopGattServer()

@@ -106,6 +106,7 @@ class GattClientManager (
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun disconnect() {
         bluetoothGatt?.disconnect()
+        refreshDeviceCache(bluetoothGatt)
         bluetoothGatt?.close()
         bluetoothGatt = null
     }
@@ -115,5 +116,14 @@ class GattClientManager (
         return properties and BluetoothGattCharacteristic.PROPERTY_READ != 0
     }
 
-
+    // 디바이스의 BLE 캐시를 삭제한다.
+    private fun refreshDeviceCache(gatt: BluetoothGatt?): Boolean {
+        return try {
+            val refresh = gatt?.javaClass?.getMethod("refresh")
+            refresh?.invoke(gatt) as Boolean
+        } catch (e: Exception) {
+            Log.w("GattClient", "Gatt 캐시 초기화 실패", e)
+            false
+        }
+    }
 }

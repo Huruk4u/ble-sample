@@ -31,46 +31,47 @@ class BleScanner (
 
         Log.d("BleScanner", "스캔 호출")
 
-        if (!scanning) {
-            // bluetooth활성화 여부 검사
-            if (!bluetoothAdapter.isEnabled) {
-                Log.d("BleScanner", "Bluetooth가 활성화 되어 있지 않습니다.")
-                return
-            }
-
-            // bluetoothLeScanner를 호출한다.
-            bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-            if (bluetoothLeScanner == null) {
-                Log.e("BleScanner", "BLE Scanner 지원하지 않음")
-                return
-            }
-
-            // BLE Advertise를 필터링한다.
-            // SERVICE UUID가 일치하는 advertise만 필터링 할거임.
-            val filter = ScanFilter.Builder()
-                .setServiceUuid(ParcelUuid(BleConstants.SERVICE_UUID))
-                .build()
-
-            Log.d("BleScanner", "요구하는 UUID ${BleConstants.SERVICE_UUID}")
-
-            // BLE 스캔 거리는 짧게 설정
-            val settings = ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
-                .build()
-
-            Log.d("BleScanner", "$bluetoothLeScanner")
-            bluetoothLeScanner?.startScan(listOf(filter), settings, scanCallback)
-            scanning = true
-            Log.d("BleScanner", "BLE 스캔 시작")
-        } else {
-            stopScan()
+        if (scanning) {
+            Log.d("BleScanner", "이미 스캔 중입니다.")
+            return
         }
+        // bluetooth활성화 여부 검사
+        if (!bluetoothAdapter.isEnabled) {
+            Log.d("BleScanner", "Bluetooth가 활성화 되어 있지 않습니다.")
+            return
+        }
+
+        // bluetoothLeScanner를 호출한다.
+        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        if (bluetoothLeScanner == null) {
+            Log.e("BleScanner", "BLE Scanner 지원하지 않음")
+            return
+        }
+
+        // BLE Advertise를 필터링한다.
+        // SERVICE UUID가 일치하는 advertise만 필터링 할거임.
+        val filter = ScanFilter.Builder()
+            .setServiceUuid(ParcelUuid(BleConstants.SERVICE_UUID))
+            .build()
+
+        Log.d("BleScanner", "요구하는 UUID ${BleConstants.SERVICE_UUID}")
+
+        // BLE 스캔 거리는 짧게 설정
+        val settings = ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
+            .build()
+
+        Log.d("BleScanner", "$bluetoothLeScanner")
+        bluetoothLeScanner?.startScan(listOf(filter), settings, scanCallback)
+        scanning = true
+        Log.d("BleScanner", "BLE 스캔 시작")
     }
 
     // 스캔 종료
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     fun stopScan() {
+        // 이쪽에서 아예 ble세션을 클리어 해야할 듯.
         scanning = false
         bluetoothLeScanner?.stopScan(scanCallback)
         bluetoothLeScanner = null
