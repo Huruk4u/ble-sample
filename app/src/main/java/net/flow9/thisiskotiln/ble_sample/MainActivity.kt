@@ -1,6 +1,5 @@
 package net.flow9.thisiskotiln.ble_sample
 
-import MainViewModel
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -10,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import net.flow9.thisiskotiln.ble_sample.presentation.main.MainScreen
+import net.flow9.thisiskotiln.ble_sample.presentation.main.MainViewModel
 import net.flow9.thisiskotiln.ble_sample.ui.theme.Ble_sampleTheme
 import net.flow9.thisiskotiln.ble_sample.util.PermissionChecker
 

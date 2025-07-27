@@ -65,10 +65,15 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.dagger/hilt-android
     implementation("com.google.dagger:hilt-android:2.56.2")
     kapt("com.google.dagger:hilt-android-compiler:2.56.2")
+    kapt("androidx.hilt:hilt-compiler:1.0.0")
 
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     // https://mvnrepository.com/artifact/androidx.lifecycle/lifecycle-viewmodel
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.9.1")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.1")
+
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 }
