@@ -99,7 +99,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             bleRepository.connectToDevice(device)
         }
-        val deviceInfo = BleDeviceInfo(device.name, device.address)
+        val deviceInfo = BleDeviceInfo(device.name?:"이름 없음", device.address)
         _scanResult.value = _scanResult.value.filter { it?.address != deviceInfo.address } + deviceInfo
     }
 

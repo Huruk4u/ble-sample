@@ -101,7 +101,7 @@ class BleScanner (
             Log.d("BleScanner", "스캔 결과 $result")
 
             result?.device?.let { device ->
-                Log.d("BleScanner", "기기 발견 ${device.name}, ${device.address}")
+                Log.d("BleScanner", "기기 발견 ${device.name?:"이름 없음"}, ${device.address}")
                 Log.d("BleScanner", "${onDeviceFound}")
                 onDeviceFound?.invoke(device)
                 stopScan()
