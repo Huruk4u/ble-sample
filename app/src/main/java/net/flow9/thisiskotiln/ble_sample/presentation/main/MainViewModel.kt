@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -56,6 +57,8 @@ class MainViewModel @Inject constructor(
     // BLE통신 중앙 역할. 광고한 기기를 탐색한다.
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     fun startScanning() {
+        if (!_isAdvertising.value) stopScanning()
+
         bleRepository.startScan()
         _isScanning.value = true
     }
@@ -71,16 +74,18 @@ class MainViewModel @Inject constructor(
     // Gatt Client. Scanner가 찾아오도록 만든다.
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE])
     fun startAdvertising() {
-        // 허용된 권한 목록 체크하기
-        bleRepository.setUserCard(myUserCard)
+        myUserCard.value?.let {
+            // 허용된 권한 목록 체크하기
+            bleRepository.setUserCard(myUserCard)
 
-        bleRepository.startGattServer()
+            bleRepository.startGattServer()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            bleRepository.startAdvertising()
-        }, 300)
-
-        _isAdvertising.value = true
+            viewModelScope.launch {
+                delay(300)
+                bleRepository.startAdvertising()
+            }
+            _isAdvertising.value = true
+        } ?: Log.e("MainViewModel", "UserCard가 설정되지 않아 Advertise를 시작할 수 없다.")
     }
 
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE])
@@ -104,6 +109,9 @@ class MainViewModel @Inject constructor(
 
     // 광고 기기로부터 받아온 카드를 viewModel의 카드에 저장한다.
     fun onUserCardReceived(card: UserCard) {
+        if (_receivedCard.value?.userId != card.userId) {
+            Log.d("MainViewModel", "카드가 변경됨")
+        }
         _receivedCard.value = card
     }
 }
