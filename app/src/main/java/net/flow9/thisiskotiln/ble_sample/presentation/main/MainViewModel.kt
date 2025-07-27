@@ -1,21 +1,35 @@
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import net.flow9.thisiskotiln.ble_sample.data.repository.BleRepositoryImpl
 import net.flow9.thisiskotiln.ble_sample.domain.model.BleDeviceInfo
 import net.flow9.thisiskotiln.ble_sample.domain.model.UserCard
 import net.flow9.thisiskotiln.ble_sample.domain.repository.BleRepository
-import net.flow9.thisiskotiln.ble_sample.util.PermissionChecker
+import javax.inject.Inject
 
-class MainViewModel(
-    private val context: Context,
-    private val bleRepository: BleRepository
+class MainViewModel @Inject constructor(
+    private val bleRepository: BleRepositoryImpl
 ) : ViewModel() {
+
+    init {
+        bleRepository.setOnUserCardReceivedListener { card ->
+            onUserCardReceived(card)
+        }
+
+        bleRepository.setOnDeviceFoundListener { device ->
+            onDeviceFound(device)
+        }
+    }
+
     private val _myUserCard = MutableStateFlow<UserCard?>(null)
     val myUserCard: StateFlow<UserCard?> = _myUserCard
 
@@ -40,12 +54,14 @@ class MainViewModel(
 
     // 데이터를 받아오는 쪽, 굳이 GATT 서버를 열지 않아도 데이터를 받을 수 있다.
     // BLE통신 중앙 역할. 광고한 기기를 탐색한다.
+    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     fun startScanning() {
         bleRepository.startScan()
         _isScanning.value = true
     }
 
     // Scanning 종료
+    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     fun stopScanning() {
         bleRepository.stopScan()
         _isScanning.value = false
@@ -53,10 +69,9 @@ class MainViewModel(
 
     // 데이터를 주는 쪽, GATT 서버를 열어서 광고를 한다.
     // Gatt Client. Scanner가 찾아오도록 만든다.
+    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE])
     fun startAdvertising() {
         // 허용된 권한 목록 체크하기
-        PermissionChecker.checkBlePermissions(context)
-        
         bleRepository.setUserCard(myUserCard)
 
         bleRepository.startGattServer()
@@ -68,6 +83,7 @@ class MainViewModel(
         _isAdvertising.value = true
     }
 
+    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE])
     // Advertising 종료
     fun stopAdvertising() {
         bleRepository.stopAdvertising()
@@ -79,8 +95,9 @@ class MainViewModel(
     fun onDeviceFound(device: BluetoothDevice) {
 
         Log.d("MainViewModel", "디바이스를 발견하여 GattClient생성")
-        bleRepository.connectToDevice(device)
-
+        viewModelScope.launch {
+            bleRepository.connectToDevice(device)
+        }
         val deviceInfo = BleDeviceInfo(device.name, device.address)
         _scanResult.value = _scanResult.value.filter { it?.address != deviceInfo.address } + deviceInfo
     }

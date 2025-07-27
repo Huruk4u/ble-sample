@@ -28,7 +28,7 @@ interface BleRepository {
     fun stopScan()
     
     // 디바이스 연결
-    fun connectToDevice(device: BluetoothDevice)
+    suspend fun connectToDevice(device: BluetoothDevice)
 
     // userCard 데이터 바인딩
     fun setUserCard(userCard: StateFlow<UserCard?>)
