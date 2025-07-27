@@ -54,7 +54,6 @@ class MainViewModel @Inject constructor(
 
     // 데이터를 받아오는 쪽, 굳이 GATT 서버를 열지 않아도 데이터를 받을 수 있다.
     // BLE통신 중앙 역할. 광고한 기기를 탐색한다.
-    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     fun startScanning() {
         if (!_isAdvertising.value) stopScanning()
 
@@ -63,7 +62,6 @@ class MainViewModel @Inject constructor(
     }
 
     // Scanning 종료
-    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     fun stopScanning() {
         bleRepository.stopScan()
         _isScanning.value = false
@@ -71,7 +69,7 @@ class MainViewModel @Inject constructor(
 
     // 데이터를 주는 쪽, GATT 서버를 열어서 광고를 한다.
     // Gatt Client. Scanner가 찾아오도록 만든다.
-    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE])
+
     fun startAdvertising() {
         myUserCard.value?.let {
             // 허용된 권한 목록 체크하기
@@ -87,7 +85,6 @@ class MainViewModel @Inject constructor(
         } ?: Log.e("MainViewModel", "UserCard가 설정되지 않아 Advertise를 시작할 수 없다.")
     }
 
-    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE])
     // Advertising 종료
     fun stopAdvertising() {
         bleRepository.stopAdvertising()
