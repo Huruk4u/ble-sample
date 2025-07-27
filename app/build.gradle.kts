@@ -63,6 +63,6 @@ dependencies {
     implementation("com.google.code.gson:gson:2.13.1")
 
     // https://mvnrepository.com/artifact/com.google.dagger/hilt-android
-    runtimeOnly("com.google.dagger:hilt-android:2.56.2")
+    implementation("com.google.dagger:hilt-android:2.56.2")
     kapt("com.google.dagger:hilt-android-compiler:2.56.2")
 }
